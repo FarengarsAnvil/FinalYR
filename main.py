@@ -23,14 +23,14 @@ def blockMode():
     Window2 = Tk()
     Window2.geometry("500x510")
     Window2.title("Blocker Mode: Disable Distractions")
-    messagebox.showinfo("Usage",
-                        "Blocker mode is used to disable processes and applications from running by killing them automatically."
-                        "\n"
-                        "\nChoose the programs you want to disable, and then press start button."
-                        "\n"
-                        "\nBlocker mode is ended by closing the application.\nThen you can resume usage of the Programs that were blocked."
-                        "\n"
-                        "\nBlocker mode also resets on close, so you have to re-add the programs you want to disable everytime for now.")
+    menubar2 = Menu(Window2)
+    Window2.config(menu=menubar2)
+    optionMenu2 = Menu(menubar2, tearoff=0, font=("Helvetica", 9))
+    menubar2.add_cascade(label="Options", menu=optionMenu2)
+    optionMenu2.add_command(label="Help", command=displayHelp)
+    optionMenu2.add_separator()
+    optionMenu2.add_command(label = "Tutorial", command = messageFive)
+    optionMenu2.add_separator()
     start = Button(Window2, text="Start Blocker", command=startBlock2).pack(pady=35)
     selectButton = Button(Window2, text="Select Applications to Block", command=blockFile).pack()
     Window2.mainloop()
@@ -147,6 +147,17 @@ def messageFour():
     # TODO:: Displays message after Invalid input into Timer entrybox.
     messagebox.showerror("Error", "User must enter a Whole Number ONLY.")
 
+def messageFive():
+    # TODO:: Displays a message to the user on how to use Blocker Mode.
+    messagebox.showinfo("Tutorial",
+    "Blocker mode is used to disable processes and applications from running by killing them automatically."
+     "\n"
+     "\nChoose the programs you want to disable, and then press start button."
+     "\n"
+     "\nBlocker mode is ended by closing the application.\nThen you can resume usage of the Programs that were blocked."
+     "\n"
+     "\nBlocker mode also resets on close, so you have to re-add the programs you want to disable everytime for now.")
+
 
 def displayHelp():
     # TODO::Calls all 3 messages when the user clicks on the Help button in the options menu.
@@ -245,6 +256,9 @@ def resetTimeList():
         pass
 
 
+def pauseBlocker():
+    # TODO:: Pauses Blocker Mode when Button is clicked.
+    pass
 
 if __name__ == '__main__':
     main()
