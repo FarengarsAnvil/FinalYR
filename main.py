@@ -6,6 +6,7 @@ from tkinter.filedialog import askopenfilename
 from tkinter.ttk import *
 import platform
 import psutil
+import re
 
 
 def overrideClose():
@@ -13,7 +14,7 @@ def overrideClose():
 
 
 def getDocs():
-    pass
+    os.system("start \"\" https://github.com/FarengarsAnvil/FinalYR")
 
 
 def blockMode():
@@ -21,6 +22,7 @@ def blockMode():
     window.destroy()
     global Window2
     Window2 = Tk()
+    Window2.protocol("WM_DELETE_WINDOW", overrideClose)
     Window2.geometry("500x510")
     Window2.title("Blocker Mode: Disable Distractions")
     menubar2 = Menu(Window2)
@@ -29,10 +31,14 @@ def blockMode():
     menubar2.add_cascade(label="Options", menu=optionMenu2)
     optionMenu2.add_command(label="Help", command=displayHelp)
     optionMenu2.add_separator()
-    optionMenu2.add_command(label = "Tutorial", command = messageFive)
+    optionMenu2.add_command(label="Tutorial", command=messageFive)
     optionMenu2.add_separator()
+    optionMenu2.add_command(label="Documentation", command=getDocs)
+    optionMenu2.add_separator()
+    optionMenu2.add_command(label="Exit", command=exitProg)
     start = Button(Window2, text="Start Blocker", command=startBlock2).pack(pady=35)
     selectButton = Button(Window2, text="Select Applications to Block", command=blockFile).pack()
+    saveButton2 = Button(Window2, text = "Save Blocklist", command=saveBlockList).pack()
     Window2.mainloop()
 
 
@@ -61,6 +67,9 @@ def startBlock2():
         Window2.after(1000, startBlock2)
     except NameError:
         messagebox.showinfo("Info", "Choose Applications before starting.")
+    except TypeError:
+        messagebox.showinfo("Info", "Blocker has been stopped.")
+        return
 
 
 def blockFile():
@@ -69,7 +78,7 @@ def blockFile():
     fileList = []
     while True:
         global file
-        filepath = askopenfilename(initialdir="C:\\Program Files", title="Select File")
+        filepath = askopenfilename(title="Select File")
         checker = [".exe"]  # Used to Check if File String is an .exe by Comparison
         file = os.path.basename(filepath)
         if filepath == "":
@@ -88,6 +97,7 @@ def main():
     global window
     global programTime
     global progress
+    loadTimeList()
     window = Tk()
     window.protocol("WM_DELETE_WINDOW", overrideClose)  # Overrides default close button
     window.geometry("500x510")
@@ -101,7 +111,7 @@ def main():
     optionMenu.add_separator()
     optionMenu.add_command(label="Help", command=displayHelp)
     optionMenu.add_separator()
-    optionMenu.add_command(label="Documentation", commmand=None)
+    optionMenu.add_command(label="Documentation", command=getDocs)
     optionMenu.add_separator()
     optionMenu.add_command(label="Exit", command=exitProg)
     startButton = Button(window, text="Start Timer", command=start, width=15).pack(side=TOP, pady=15)
@@ -113,7 +123,8 @@ def main():
     progress = DoubleVar()
     progressBar = Progressbar(window, orient=HORIZONTAL, mode="determinate", variable=progress).pack(pady=15)
     showTimeListButton = Button(window, text="Show Timelist", command=displayTime, width=15).pack(pady=10)
-    clrButton = Button(window, text = "Clear Timelist", command = resetTimeList, width = 15).pack(pady = 10)
+    saveListButton = Button(window, text="Save Timelist", command=saveTimeList, width=15).pack(pady=5)
+    clrButton = Button(window, text="Clear Timelist", command=resetTimeList, width=15).pack(pady=10)
     # Progress Variable is for updating the Progressbar as time goes on.
     window.mainloop()
 
@@ -147,16 +158,17 @@ def messageFour():
     # TODO:: Displays message after Invalid input into Timer entrybox.
     messagebox.showerror("Error", "User must enter a Whole Number ONLY.")
 
+
 def messageFive():
     # TODO:: Displays a message to the user on how to use Blocker Mode.
     messagebox.showinfo("Tutorial",
-    "Blocker mode is used to disable processes and applications from running by killing them automatically."
-     "\n"
-     "\nChoose the programs you want to disable, and then press start button."
-     "\n"
-     "\nBlocker mode is ended by closing the application.\nThen you can resume usage of the Programs that were blocked."
-     "\n"
-     "\nBlocker mode also resets on close, so you have to re-add the programs you want to disable everytime for now.")
+                        "Blocker mode is used to disable processes and applications from running by killing them automatically."
+                        "\n"
+                        "\nChoose the programs you want to disable, and then press start button."
+                        "\n"
+                        "\nBlocker mode is ended by closing the application.\nThen you can resume usage of the Programs that were blocked."
+                        "\n"
+                        "\nBlocker mode also resets on close, so you have to re-add the programs you want to disable everytime for now.")
 
 
 def displayHelp():
@@ -214,7 +226,7 @@ def openfile():
     timeList = []
     while True:
         global file
-        filepath = askopenfilename(initialdir="C:\\Program Files", title="Select File")
+        filepath = askopenfilename(title="Select File")
         checker = [".exe"]
         # Checker array used to check if the Program selected is an .exe
         file = os.path.basename(filepath)
@@ -241,24 +253,55 @@ def displayTime():
     # TODO:: Mapped to Button that displays all Timed Applications On Click.
     try:
         global timeList
-        messagebox.showinfo("Applications","Timed Apps: " + str(timeList))
+        messagebox.showinfo("Applications", "Timed Apps: " + str(timeList))
     except NameError:
         messagebox.showinfo("Info", "Timelist is Empty.")
 
 
 def resetTimeList():
-    # TODO:: Mapped to Button that clears all Timed Applications on click.
+    # TODO:: Mapped to Button that clears all Timed Applications on click and clears Saved Timelist.
     try:
         global timeList
         timeList.clear()
         messagebox.showinfo("Info", "Timelist Cleared.")
+        if os.path.exists("Timelist.txt"):
+            os.remove("Timelist.txt")
+        else:
+            pass
     except NameError:
         pass
 
 
-def pauseBlocker():
-    # TODO:: Pauses Blocker Mode when Button is clicked.
+def saveTimeList():
+    # TODO:: Writes the Timelist to file.
+    timeFile = open("Timelist.txt", "w")
+    timeFile.write(str(timeList))
+    timeFile.close()
+    messagebox.showinfo("Saved", "The Timelist has been saved.")
+
+
+def saveBlockList():
+    # TODO:: Writes the fileList Array to File, which contains the Applications that have been added to the blocklist for Blocker mode.
+    blockFile = open("Blocklist.txt", "w")
+    blockFile.write(str(fileList))
+    blockFile.close()
+    messagebox.showinfo("Saved", "The Blocklist has been saved.")
+
+
+def loadTimeList():
+    # TODO:: Loads the Timelist from the File back into the application. Checks if Empty.
+    try:
+        global timeList
+        loadTime = open("Timelist.txt", "r")
+        timeList = loadTime.read()
+    except FileNotFoundError:
+        pass
+
+
+def loadBlockList():
+    # TODO:: Loads the Blocklist from thw File back into Blockermode. Checks if it is Empty initially.
     pass
+
 
 if __name__ == '__main__':
     main()
