@@ -6,29 +6,33 @@ from tkinter.filedialog import askopenfilename
 from tkinter.ttk import *
 import platform
 import psutil
-import re
 
 
 def overrideClose():
+    # TODO:: Literally nothing.
     pass
 
 
 def getDocs():
+    # TODO:: Mapped to button in menu, opens up web address containing docs.
     os.system("start \"\" https://github.com/FarengarsAnvil/FinalYR")
 
 
 def blockMode():
-    # TODO:: Init Blocker Mode Window, Close Timer Window.
+    # TODO:: Init Blocker Mode GUI in seperate Window, Close Timer Window.
     window.destroy()
+    loadBlockList()
     global Window2
     Window2 = Tk()
     Window2.protocol("WM_DELETE_WINDOW", overrideClose)
     Window2.geometry("500x510")
-    Window2.title("Blocker Mode: Disable Distractions")
+    Window2.title("Program Blocker")
     menubar2 = Menu(Window2)
     Window2.config(menu=menubar2)
     optionMenu2 = Menu(menubar2, tearoff=0, font=("Helvetica", 9))
     menubar2.add_cascade(label="Options", menu=optionMenu2)
+    optionMenu2.add_command(label="Timer", command=main)
+    optionMenu2.add_separator()
     optionMenu2.add_command(label="Help", command=displayHelp)
     optionMenu2.add_separator()
     optionMenu2.add_command(label="Tutorial", command=messageFive)
@@ -36,9 +40,11 @@ def blockMode():
     optionMenu2.add_command(label="Documentation", command=getDocs)
     optionMenu2.add_separator()
     optionMenu2.add_command(label="Exit", command=exitProg)
-    start = Button(Window2, text="Start Blocker", command=startBlock2).pack(pady=35)
-    selectButton = Button(Window2, text="Select Applications to Block", command=blockFile).pack()
-    saveButton2 = Button(Window2, text = "Save Blocklist", command=saveBlockList).pack()
+    start = Button(Window2, text="Start Blocker", command=startBlock2, width=15).pack(pady=5)
+    selectButton = Button(Window2, text="Select Applications", command=blockFile, width=17).pack(pady=5)
+    showBlocklistButton = Button(Window2, text="Show Blocklist", command=displayBlock, width=15).pack(pady=5)
+    saveButton2 = Button(Window2, text="Save Blocklist", command=saveBlockList, width=15).pack(pady=5)
+    clrButton = Button(Window2, text="Clear Blocklist", command=resetBlockList, width=15).pack(pady=5)
     Window2.mainloop()
 
 
@@ -73,7 +79,7 @@ def startBlock2():
 
 
 def blockFile():
-    # TODO:: fetches the Program Processes name in a string from Filemenu and appends it to  fileList
+    # TODO:: fetches the Program Processes name in a string from Filemenu and appends it to  fileList.
     global fileList
     fileList = []
     while True:
@@ -95,6 +101,7 @@ def blockFile():
 def main():
     # TODO:: Initialise Main GUI Window, Initialise Widgets.
     global window
+    global Window2
     global programTime
     global progress
     loadTimeList()
@@ -255,41 +262,74 @@ def displayTime():
         global timeList
         messagebox.showinfo("Applications", "Timed Apps: " + str(timeList))
     except NameError:
-        messagebox.showinfo("Info", "Timelist is Empty.")
+        messagebox.showinfo("Info", "Timelist Empty.")
+
+
+def displayBlock():
+    # TODO:: Displays the contents of the Blocklist on-click.
+    try:
+        global fileList
+        messagebox.showinfo("Applications", "Blocked Apps: " + str(fileList))
+    except NameError:
+        messagebox.showinfo("Info", "Blocklist Empty.")
 
 
 def resetTimeList():
     # TODO:: Mapped to Button that clears all Timed Applications on click and clears Saved Timelist.
     try:
         global timeList
-        timeList.clear()
+        timeList = None
         messagebox.showinfo("Info", "Timelist Cleared.")
         if os.path.exists("Timelist.txt"):
             os.remove("Timelist.txt")
-        else:
-            pass
+    except NameError:
+        pass
+
+
+def resetBlockList():
+    # TODO:: Resets the Blocklist as well as the Saved Blocklist.
+    try:
+        global fileList
+        fileList = None
+        messagebox.showinfo("Info", "Blocklist Cleared.")
+        if os.path.exists("Blocklist.txt"):
+            os.remove("Blocklist.txt")
     except NameError:
         pass
 
 
 def saveTimeList():
-    # TODO:: Writes the Timelist to file.
-    timeFile = open("Timelist.txt", "w")
-    timeFile.write(str(timeList))
-    timeFile.close()
-    messagebox.showinfo("Saved", "The Timelist has been saved.")
+    # TODO:: Writes the Timelist to file if not empty.
+    try:
+        global timeList
+        if len(timeList) != 0:  # Only save to File if the Timelist has 1 Item.
+            timeFile = open("Timelist.txt", "w")
+            timeFile.write(str(timeList))
+            timeFile.close()
+            messagebox.showinfo("Saved", "The Timelist has been saved.")
+    except TypeError:
+        pass
+    except NameError:
+        pass
 
 
 def saveBlockList():
-    # TODO:: Writes the fileList Array to File, which contains the Applications that have been added to the blocklist for Blocker mode.
-    blockFile = open("Blocklist.txt", "w")
-    blockFile.write(str(fileList))
-    blockFile.close()
-    messagebox.showinfo("Saved", "The Blocklist has been saved.")
+    # TODO:: Writes the fileList to File for Blocker.
+    try:
+        global fileList
+        if len(fileList) != 0:
+            blockFile = open("Blocklist.txt", "w")
+            blockFile.write(str(fileList))
+            blockFile.close()
+            messagebox.showinfo("Saved", "The Blocklist has been saved.")
+    except TypeError:
+        pass
+    except NameError:
+        pass
 
 
 def loadTimeList():
-    # TODO:: Loads the Timelist from the File back into the application. Checks if Empty.
+    # TODO:: Loads the Timelist from the File back into the application. Checks if Exists.
     try:
         global timeList
         loadTime = open("Timelist.txt", "r")
@@ -299,8 +339,13 @@ def loadTimeList():
 
 
 def loadBlockList():
-    # TODO:: Loads the Blocklist from thw File back into Blockermode. Checks if it is Empty initially.
-    pass
+    # TODO:: Loads the Blocklist from the File back into Blockermode. Checks if Exists.
+    try:
+        global fileList
+        loadBlock = open("Blocklist.txt", "r")
+        fileList = loadBlock.read()
+    except FileNotFoundError:
+        pass
 
 
 if __name__ == '__main__':
