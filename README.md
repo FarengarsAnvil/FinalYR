@@ -1,4 +1,4 @@
-# FinalYR
+# Progtimer
 Final Year Project 
 
 PROGTIMER README:
